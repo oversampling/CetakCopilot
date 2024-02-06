@@ -6,6 +6,12 @@ import (
 	"github.com/gofiber/template/html/v2"
 )
 
+type Quotation struct {
+	SizeCategory string "json:sizeCategory"
+	QuantityFrom int "json:quantityFrom"
+	QuantityTo int "json:quantityTo"
+	Material string "json:material"
+}	
 
 func main()  {
 	engine := html.New("./views", ".html")
@@ -21,6 +27,14 @@ func main()  {
         })
     })
 
+	app.Get("/getQuotation", func(c *fiber.Ctx) error {
+		// Connect to Google Sheets
+		quotation := new(Quotation)
+		if err := c.BodyParser(quotation); err != nil {
+            return err
+        }
+		return c.JSON(quotation)
+	})
 
     log.Fatal(app.Listen(":80"))
 	
