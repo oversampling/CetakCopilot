@@ -18,7 +18,7 @@
 
 <body>
     <h1>Quotation Calculator</h1>
-    <form>
+    <form class="quoatation_form">
         <div class="row g-3 align-items-center">
             <div class="col-auto">
                 <label for="inputPassword6" class="col-form-label">Category Size</label>
@@ -214,11 +214,11 @@
                 </div>
             </div>
         </div>
-        <button type="button" id="generateQuoatationBtn">Generate Quotation</button>
-        <div class="row g-3 align-items-center">
+        <button type="button" id="generateQuoatationBtn" class="btn btn-primary">Generate Quotation</button>
+        <!-- <div class="row g-3 align-items-center">
             <div class="row g-3 align-items-center col-auto">
                 <div class="col-auto">
-                    <button>WhatsApp Quotation</button>
+                    <button class="btn btn-primary">WhatsApp Quotation</button>
                 </div>
                 <div class="col-auto">
                     <input type="text" />
@@ -226,17 +226,47 @@
             </div>
             <div class="row g-3 col-auto">
                 <div class="col-auto">
-                    <button>Email Quotatioon</button>
+                    <button class="btn btn-primary">Email Quotatioon</button>
                 </div>
                 <div class="col-auto">
                     <input type="text" />
                 </div>
             </div>
+        </div> -->
+        <div class="form-floating">
+            <textarea class="form-control" placeholder="Leave a comment here" style="height: 100px"
+                id="quotationResult"></textarea>
+            <label for="floatingTextarea2">Quotation</label>
         </div>
     </form>
     <script>
         let generateQuoatationBtn = document.getElementById('generateQuoatationBtn');
-        console.log(generateQuoatationBtn);
+        let quotationResult = document.getElementById('quotationResult');
+
+        generateQuoatationBtn.addEventListener('click', async function (e) {
+            e.preventDefault();
+            const response = await fetch("/getQuotation", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sizeCategory: "A2++",
+                    readiedSize: true,
+                    noOfColours: 4,
+                    material: "art_card_350gsm",
+                    quantity: [100, 200],
+                })
+            })
+            const data = await response.json();
+            let quotation = "" + data.priceLabel + "\n" + data.price;
+            quotationResult.value = quotation;
+        });
+        let quotationForm = document.querySelector('.quoatation_form');
+        quotationForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            console.log('quotationForm');
+        });
         // generateQuoatationBtn.addEventListener('click', function (e) {
         //     e.preventDefault();
         //     console.log('generateQuoatationBtn');

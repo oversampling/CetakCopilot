@@ -1,1 +1,6 @@
 /tmp
+.env
+/bin
+air
+credentials.json
+token.json
