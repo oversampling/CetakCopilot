@@ -20,25 +20,31 @@ import (
 )
 
 var (
-	materials     = []string{"art_card_350gsm", "art_card_300gsm", "art_card_260gsm", "boxboard_350gsm"}
-	categorySize  = []string{"A1+", "A1", "½A1 (RR)", "⅓A2++ (rr)", "A2++"}
-	quantityRange = []int{100, 200, 300, 400, 500, 1000, 1500, 2000, 3000, 4000, 5000}
+	materials                 = []string{"art_card_350gsm", "art_card_300gsm", "art_card_260gsm", "boxboard_350gsm"}
+	categorySize              = []string{"A1+", "A1", "½A1 (RR)", "⅓A2++ (rr)", "A2++"}
+	quantityRange             = []int{100, 200, 300, 400, 500, 1000, 1500, 2000, 3000, 4000, 5000}
+	surfaceProtectionPrinting = []string{"water base normal 1 side", "water base food grade 1 side", "uv varnish 1side", "no finishing (may cause colour rubbing issue)"}
 )
 
 type Quotation struct {
-	SizeCategory string `json:"sizeCategory"`
-	Quantity     []int  `json:"quantity"`
-	Material     string `json:"material"`
-	NoOfColours  int    `json:"noOfColours"`
-	ReadiedSize  bool   `json:"readiedSize"`
+	SizeCategory string   `json:"sizeCategory"`
+	Quantity     []int    `json:"quantity"`
+	Material     string   `json:"material"`
+	NoOfColours  int      `json:"noOfColours"`
+	ReadiedSize  bool     `json:"readiedSize"`
+	IsDoubleSide bool     `json:"isDoubleSide"`
+	AddOns       []string `json:"addOns"`
 }
 
 type Pricing struct {
-	Quantity    int      `json:"quantity"`
-	Price       []string `json:"price"`
-	PriceLabel  string   `json:"priceLabel"`
-	ReadiedSize bool     `json:"readiedSize"`
-	NoOfColours int      `json:"noOfColours"`
+	Quantity     int      `json:"quantity"`
+	Price        []string `json:"price"`
+	PriceLabel   string   `json:"priceLabel"`
+	ReadiedSize  bool     `json:"readiedSize"`
+	NoOfColours  int      `json:"noOfColours"`
+	IsDoubleSide bool     `json:"isDoubleSide"`
+	Header       string   `json:"header"`
+	SizeCategory string   `json:"sizeCategory"`
 }
 
 // Retrieve a token, saves the token, then returns the generated client.
@@ -140,11 +146,14 @@ func calcuateQuotation(quotation Quotation, value [][]interface{}) (Pricing, err
 	noOfQuantity := len(quotation.Quantity)
 	search_str_material = strings.Replace(search_str_material, "_", " ", -1)
 	prices := Pricing{
-		Quantity:    quotation.Quantity[0],
-		NoOfColours: quotation.NoOfColours,
-		ReadiedSize: quotation.ReadiedSize,
-		PriceLabel:  search_str_material,
-		Price:       []string{},
+		Quantity:     quotation.Quantity[0],
+		NoOfColours:  quotation.NoOfColours,
+		ReadiedSize:  quotation.ReadiedSize,
+		PriceLabel:   search_str_material,
+		Price:        []string{},
+		Header:       fmt.Sprintf("Quotation for %s, %s \n", search_str_material, quotation.SizeCategory),
+		IsDoubleSide: quotation.IsDoubleSide,
+		SizeCategory: quotation.SizeCategory,
 	}
 	tempQuantitySearchIdx := 0
 	for _, row := range value {
@@ -152,9 +161,9 @@ func calcuateQuotation(quotation Quotation, value [][]interface{}) (Pricing, err
 			quantity_search := strconv.Itoa(quotation.Quantity[tempQuantitySearchIdx])
 			if row[2] == search_str_material && row[3] == quotation.SizeCategory && row[1] == colourSearchStr && row[4] == quantity_search {
 				if row[5] == "" || row[5] == "not available" {
-					row[5] = "#N/A"
+					row[5] = "Not Available"
 				}
-				prices.Price = append(prices.Price, fmt.Sprintf("%s pcs: RM%s printing \n", row[4], row[5]))
+				prices.Price = append(prices.Price, fmt.Sprintf("%s pcs: RM%s printing", row[4], row[5]))
 				tempQuantitySearchIdx++
 				if len(prices.Price) == noOfQuantity {
 					break
@@ -163,6 +172,77 @@ func calcuateQuotation(quotation Quotation, value [][]interface{}) (Pricing, err
 		}
 	}
 	return prices, nil
+}
+
+func calculateAddOn(price Pricing, addOns []string, value [][]interface{}, quotation Quotation) (Pricing, error) {
+	for _, addOn := range addOns {
+		price.PriceLabel += fmt.Sprintf(" + %s", addOn)
+		tempQuantitySearchIdx := 0
+		if addOn == "no finishing (may cause colour rubbing issue)" {
+			for i := 0; i < len(price.Price); i++ {
+				price.Price[i] += " + Not Available"
+			}
+			continue
+		}
+		// If strings contains _ mean is secondary finishing
+		if strings.Contains(addOn, "_") {
+			//split string by dash
+			addOnType := strings.Split(addOn, "_")[0]
+			spec := strings.Split(addOn, "_")[1]
+			for _, row := range value {
+				if len(row) != 1 && len(row) != 0 {
+					quantity_search := strconv.Itoa(quotation.Quantity[tempQuantitySearchIdx])
+					if row[0] == addOnType && row[1] == spec && row[2] == quantity_search {
+						if quotation.IsDoubleSide {
+							if len(row) != 5 {
+								price.Price[tempQuantitySearchIdx] += fmt.Sprintf(" + Not Available (%s)", addOnType)
+							} else {
+								if row[4] == "" || row[4] == "not available" {
+									row[4] = fmt.Sprintf(" + Not Available (%s)", addOnType)
+								}
+								price.Price[tempQuantitySearchIdx] += fmt.Sprintf(" + RM %s (%s)", row[4], addOnType)
+							}
+
+						} else {
+							if row[3] == "" {
+								row[3] = "Not Available"
+							}
+							price.Price[tempQuantitySearchIdx] += fmt.Sprintf(" + RM%s", row[3])
+						}
+						if tempQuantitySearchIdx == len(quotation.Quantity)-1 {
+							break
+						}
+						tempQuantitySearchIdx++
+					}
+				}
+			}
+			continue
+		} else {
+			for _, row := range value {
+				if len(row) != 1 && len(row) != 0 {
+					quantity_search := strconv.Itoa(quotation.Quantity[tempQuantitySearchIdx])
+					if row[0] == addOn && row[1] == price.SizeCategory && row[2] == quantity_search {
+						if quotation.IsDoubleSide {
+							if row[4] == "" {
+								row[4] = fmt.Sprintf(" + Not Available (%s)", addOn)
+							}
+							price.Price[tempQuantitySearchIdx] += fmt.Sprintf(" + RM%s (%s)", row[4], addOn)
+						} else {
+							if row[3] == "" {
+								row[3] = fmt.Sprintf(" + Not Available (%s)", addOn)
+							}
+							price.Price[tempQuantitySearchIdx] += fmt.Sprintf(" + RM%s (%s)", row[3], addOn)
+						}
+						if tempQuantitySearchIdx == len(quotation.Quantity)-1 {
+							break
+						}
+						tempQuantitySearchIdx++
+					}
+				}
+			}
+		}
+	}
+	return price, nil
 }
 
 func main() {
@@ -183,9 +263,10 @@ func main() {
 	app.Get("/", func(c *fiber.Ctx) error {
 		// Render index template
 		return c.Render("index", fiber.Map{
-			"materials":     materials,
-			"categorySize":  categorySize,
-			"quantityRange": quantityRange,
+			"materials":                 materials,
+			"categorySize":              categorySize,
+			"quantityRange":             quantityRange,
+			"surfaceProtectionPrinting": surfaceProtectionPrinting,
 		})
 	})
 
@@ -194,11 +275,30 @@ func main() {
 		if err := c.BodyParser(quotation); err != nil {
 			return err
 		}
-		value, err := getValueFromGoogleSheet(srv, spreadsheetId, "Printing Raw!A1:F")
+		var value [][]interface{}
+		if quotation.IsDoubleSide {
+			value, err = getValueFromGoogleSheet(srv, spreadsheetId, "double sides print raw")
+			if err != nil {
+				return err
+			}
+		} else {
+			value, err = getValueFromGoogleSheet(srv, spreadsheetId, "Printing Raw")
+			if err != nil {
+				return err
+			}
+		}
+		prices, err := calcuateQuotation(*quotation, value)
 		if err != nil {
 			return err
 		}
-		prices, _ := calcuateQuotation(*quotation, value)
+		value, err = getValueFromGoogleSheet(srv, spreadsheetId, "finishing raw (imported)!A1:F")
+		if err != nil {
+			return err
+		}
+		prices, err = calculateAddOn(prices, quotation.AddOns, value, *quotation)
+		if err != nil {
+			return err
+		}
 		return c.JSON(prices)
 	})
 
