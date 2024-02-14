@@ -20,10 +20,9 @@ import (
 )
 
 var (
-	art_card_350gsm = "art_card_350gsm"
-	box_board       = "box_board"
-	materials       = []string{art_card_350gsm, box_board}
-	categorySize    = []string{"A1+", "A1", "½A1 (RR)", "⅓A2++ (rr)", "A2++"}
+	materials     = []string{"art_card_350gsm", "art_card_300gsm", "art_card_260gsm", "boxboard_350gsm"}
+	categorySize  = []string{"A1+", "A1", "½A1 (RR)", "⅓A2++ (rr)", "A2++"}
+	quantityRange = []int{100, 200, 300, 400, 500, 1000, 1500, 2000, 3000, 4000, 5000}
 )
 
 type Quotation struct {
@@ -152,7 +151,10 @@ func calcuateQuotation(quotation Quotation, value [][]interface{}) (Pricing, err
 		if len(row) == 6 {
 			quantity_search := strconv.Itoa(quotation.Quantity[tempQuantitySearchIdx])
 			if row[2] == search_str_material && row[3] == quotation.SizeCategory && row[1] == colourSearchStr && row[4] == quantity_search {
-				prices.Price = append(prices.Price, fmt.Sprintf("%s pcs: %s printing ", row[4], row[5]))
+				if row[5] == "" || row[5] == "not available" {
+					row[5] = "#N/A"
+				}
+				prices.Price = append(prices.Price, fmt.Sprintf("%s pcs: RM%s printing \n", row[4], row[5]))
 				tempQuantitySearchIdx++
 				if len(prices.Price) == noOfQuantity {
 					break
@@ -181,7 +183,9 @@ func main() {
 	app.Get("/", func(c *fiber.Ctx) error {
 		// Render index template
 		return c.Render("index", fiber.Map{
-			"Title": "Hello, World!",
+			"materials":     materials,
+			"categorySize":  categorySize,
+			"quantityRange": quantityRange,
 		})
 	})
 
@@ -190,13 +194,10 @@ func main() {
 		if err := c.BodyParser(quotation); err != nil {
 			return err
 		}
-		log.Println(quotation)
-		log.Println(quotation.SizeCategory)
 		value, err := getValueFromGoogleSheet(srv, spreadsheetId, "Printing Raw!A1:F")
 		if err != nil {
 			return err
 		}
-		// log.Println(value[7401])
 		prices, _ := calcuateQuotation(*quotation, value)
 		return c.JSON(prices)
 	})
