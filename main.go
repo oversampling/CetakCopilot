@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,10 +21,15 @@ import (
 )
 
 var (
-	materials                 = []string{"art_card_350gsm", "art_card_300gsm", "art_card_260gsm", "boxboard_350gsm"}
-	categorySize              = []string{"A1+", "A1", "½A1 (RR)", "⅓A2++ (rr)", "A2++"}
-	quantityRange             = []int{100, 200, 300, 400, 500, 1000, 1500, 2000, 3000, 4000, 5000}
-	surfaceProtectionPrinting = []string{"water base normal 1 side", "water base food grade 1 side", "uv varnish 1side", "no finishing (may cause colour rubbing issue)"}
+	materials                            = []string{"art card 350gsm", "art card 300gsm", "art card 260gsm", "boxboard 350gsm", ""}
+	categorySize                         = []string{"A1+", "A1", "½A1 (RR)", "⅓A2++ (rr)", "A2++", ""}
+	quantityRange                        = []int{100, 200, 300, 400, 500, 1000, 1500, 2000, 3000, 4000, 5000}
+	surfaceProtectionPrinting            = []string{"no finishing (may cause colour rubbing issue)", "water base normal 1 side", "water base food grade 1 side", "uv varnish 1side"}
+	windowHoleWithoutTransparentPVCSheet = []string{"within 3mm to 50mm", "within 90mm x 54mm", "within 148mm x 105mm", "within 210mm x 148mm", "within 222mm x 190mm", "within 297mm x 210mm", "within 300mm x 297mm", "within 420mm x 297mm"}
+	windowHoleWithTransparentPVCSheet    = []string{"within 45mm x 45mm", "within 90mm x 54mm", "within 90mm x 90mm", "within 148mm x 210mm", "within 297mm x 210mm"}
+	hotstamping                          = []string{"within 16 square inch", "within 24 square inch", "within 32 square inch"}
+	emboss_deboss                        = []string{"within 16 square inch", "within 24 square inch", "within 32 square inch"}
+	stringFinishing                      = []string{"12inch", "14inch", "16inch", "18inch", "20inch", "22inch", "24inch", "26inch", "28inch", "30inch"}
 )
 
 type Quotation struct {
@@ -144,7 +150,7 @@ func calcuateQuotation(quotation Quotation, value [][]interface{}) (Pricing, err
 		colourSearchStr = fmt.Sprintf("%d%s", quotation.NoOfColours, "colours")
 	}
 	noOfQuantity := len(quotation.Quantity)
-	search_str_material = strings.Replace(search_str_material, "_", " ", -1)
+	// search_str_material = strings.Replace(search_str_material, "_", " ", -1)
 	prices := Pricing{
 		Quantity:     quotation.Quantity[0],
 		NoOfColours:  quotation.NoOfColours,
@@ -161,9 +167,9 @@ func calcuateQuotation(quotation Quotation, value [][]interface{}) (Pricing, err
 			quantity_search := strconv.Itoa(quotation.Quantity[tempQuantitySearchIdx])
 			if row[2] == search_str_material && row[3] == quotation.SizeCategory && row[1] == colourSearchStr && row[4] == quantity_search {
 				if row[5] == "" || row[5] == "not available" {
-					row[5] = "Not Available"
+					row[5] = " Not Available"
 				}
-				prices.Price = append(prices.Price, fmt.Sprintf("%s pcs: RM%s printing", row[4], row[5]))
+				prices.Price = append(prices.Price, fmt.Sprintf("%s pcs: RM%s Printing", row[4], row[5]))
 				tempQuantitySearchIdx++
 				if len(prices.Price) == noOfQuantity {
 					break
@@ -180,7 +186,7 @@ func calculateAddOn(price Pricing, addOns []string, value [][]interface{}, quota
 		tempQuantitySearchIdx := 0
 		if addOn == "no finishing (may cause colour rubbing issue)" {
 			for i := 0; i < len(price.Price); i++ {
-				price.Price[i] += " + Not Available"
+				price.Price[i] += " + Not Available (no finishing)"
 			}
 			continue
 		}
@@ -263,10 +269,14 @@ func main() {
 	app.Get("/", func(c *fiber.Ctx) error {
 		// Render index template
 		return c.Render("index", fiber.Map{
-			"materials":                 materials,
-			"categorySize":              categorySize,
-			"quantityRange":             quantityRange,
-			"surfaceProtectionPrinting": surfaceProtectionPrinting,
+			"materials":                            materials,
+			"categorySize":                         categorySize,
+			"quantityRange":                        quantityRange,
+			"surfaceProtectionPrinting":            surfaceProtectionPrinting,
+			"windowHoleWithoutTransparentPVCSheet": windowHoleWithoutTransparentPVCSheet,
+			"hotstamping":                          hotstamping,
+			"embossDeboss":                         emboss_deboss,
+			"stringFinishing":                      stringFinishing,
 		})
 	})
 
@@ -299,9 +309,29 @@ func main() {
 		if err != nil {
 			return err
 		}
+		prices, err = categorizeMachineType(prices, *quotation)
+		if err != nil {
+			return err
+		}
 		return c.JSON(prices)
 	})
 
 	log.Fatal(app.Listen(":8000"))
 
+}
+
+func categorizeMachineType(pricing Pricing, quotation Quotation) (Pricing, error) {
+	if (quotation.Quantity[0] <= 500) && (quotation.Quantity[len(quotation.Quantity)-1] <= 500) {
+		pricing.PriceLabel = "machine type: digital offset \n" + pricing.PriceLabel
+		return pricing, nil
+	}
+	if (quotation.Quantity[0] > 500) && (quotation.Quantity[len(quotation.Quantity)-1] <= 5000) {
+		pricing.PriceLabel = "machine type: litho offset \n" + pricing.PriceLabel
+		return pricing, nil
+	}
+	if (quotation.Quantity[0] <= 500) && (quotation.Quantity[len(quotation.Quantity)-1] <= 5000) {
+		pricing.PriceLabel = "machine type: litho offset (1000pcs & above), digital offset (10-500pcs) \n" + pricing.PriceLabel
+		return pricing, nil
+	}
+	return pricing, errors.New("unable to categorize machine type")
 }

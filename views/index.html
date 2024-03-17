@@ -109,11 +109,11 @@
                     <label for="inputPassword6" class="col-form-label">Surface Protection Printing</label>
                 </div>
                 <div class="col-auto">
-                    <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                        <option selected>Open this select menu</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                    <select class="form-select" id="surfaceProtectionPrinting"
+                        aria-label="Floating label select example">
+                        {{ range .surfaceProtectionPrinting}}
+                        <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
                     </select>
                 </div>
             </div>
@@ -122,11 +122,9 @@
                     <label for="inputPassword6" class="col-form-label">Spot UV 1 Side</label>
                 </div>
                 <div class="col-auto">
-                    <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                        <option selected>Open this select menu</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                    <select class="form-select" id="spotUV1side" aria-label="Floating label select example">
+                        <option selected value="false">Don't</option>
+                        <option value="true">Yes</option>
                     </select>
                 </div>
             </div>
@@ -135,11 +133,26 @@
                     <label for="inputPassword6" class="col-form-label">Window Hole Without Transperant PVC Sheet</label>
                 </div>
                 <div class="col-auto">
-                    <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                        <option selected>Open this select menu</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                    <select class="form-select" id="windowHoleWithoutTransparentPVCSheet"
+                        aria-label="Floating label select example">
+                        <option selected value="">None</option>
+                        {{ range .windowHoleWithoutTransparentPVCSheet }}
+                        <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label for="inputPassword6" class="col-form-label">Window Hole Without Transperant PVC Sheet</label>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select" id="windowHoleWithTransparentPVCSheet"
+                        aria-label="Floating label select example">
+                        <option selected value="">None</option>
+                        {{ range .windowHoleWithTransparentPVCSheet }}
+                        <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
                     </select>
                 </div>
             </div>
@@ -148,11 +161,11 @@
                     <label for="inputPassword6" class="col-form-label">Hot Stamping</label>
                 </div>
                 <div class="col-auto">
-                    <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                        <option selected>Open this select menu</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                    <select class="form-select" id="hotstamping" aria-label="Floating label select example">
+                        <option selected value="">None</option>
+                        {{ range .hotstamping }}
+                        <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
                     </select>
                 </div>
             </div>
@@ -161,11 +174,11 @@
                     <label for="inputPassword6" class="col-form-label">Emboss / Deboss</label>
                 </div>
                 <div class="col-auto">
-                    <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                        <option selected>Open this select menu</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                    <select class="form-select" id="embossDeboss" aria-label="Floating label select example">
+                        <option selected value="">None</option>
+                        {{ range .embossDeboss }}
+                        <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
                     </select>
                 </div>
             </div>
@@ -174,11 +187,11 @@
                     <label for="inputPassword6" class="col-form-label">String</label>
                 </div>
                 <div class="col-auto">
-                    <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                        <option selected>Open this select menu</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                    <select class="form-select" id="stringFinishing" aria-label="Floating label select example">
+                        <option selected value="">None</option>
+                        {{ range .stringFinishing }}
+                        <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
                     </select>
                 </div>
             </div>
@@ -187,11 +200,9 @@
                     <label for="inputPassword6" class="col-form-label">Print Other Side</label>
                 </div>
                 <div class="col-auto">
-                    <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                        <option selected>Open this select menu</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                    <select class="form-select" id="isDoubleSide" aria-label="Floating label select example">
+                        <option selected value="false">No</option>
+                        <option value="true">Yes</option>
                     </select>
                 </div>
             </div>
@@ -225,6 +236,12 @@
         let material = document.getElementById('material');
         let quantityFrom = document.getElementById('quantityFrom');
         let quantityTo = document.getElementById('quantityTo');
+        let spotUV1side = document.getElementById('spotUV1side');
+        let surfaceProtectionPrinting = document.getElementById('surfaceProtectionPrinting');
+        let windowHoleWithoutTransparentPVCSheet = document.getElementById('windowHoleWithoutTransparentPVCSheet');
+        let windowHoleWithTransparentPVCSheet = document.getElementById('windowHoleWithTransparentPVCSheet');
+        let hotstamping = document.getElementById('hotstamping');
+        let embossDeboss = document.getElementById('embossDeboss');
         let quantityRange = [100, 200, 300, 400, 500, 1000, 1500, 2000, 3000, 4000, 5000]
 
         function getQuantitySubRange(lower, upper) {
@@ -253,7 +270,27 @@
         }
         quantitySubRange = getQuantitySubRange(100, 500);
         generateQuoatationBtn.addEventListener('click', async function (e) {
+            addOns = [];
             e.preventDefault();
+            addOns.push(surfaceProtectionPrinting.value);
+            if (spotUV1side.value === "true") {
+                addOns.push("spot uv 1side_" + categorySize.value);
+            }
+            if (windowHoleWithoutTransparentPVCSheet.value !== "") {
+                addOns.push("window hole without transparent pvc sheet_" + windowHoleWithoutTransparentPVCSheet.value + "_" + categorySize.value);
+            }
+            if (windowHoleWithTransparentPVCSheet.value !== "") {
+                addOns.push("window hole with transparent pvc sheet_" + windowHoleWithTransparentPVCSheet.value);
+            }
+            if (hotstamping.value !== "") {
+                addOns.push("hot stamping_" + hotstamping.value);
+            }
+            if (embossDeboss.value !== "") {
+                addOns.push("emboss deboss_" + embossDeboss.value);
+            }
+            if (stringFinishing.value !== "") {
+                addOns.push("string_" + stringFinishing.value);
+            }
             const response = await fetch("/getQuotation", {
                 method: "POST",
                 headers: {
@@ -264,14 +301,17 @@
                     readiedSize: (isReadiedSize.value === "readied") ? true : false,
                     noOfColours: parseInt(noOfColours.value),
                     material: material.value,
+                    isDoubleSide: (isDoubleSide.value === "true") ? true : false,
+                    addOns,
                     quantity: getQuantitySubRange(parseInt(quantityFrom.value), parseInt(quantityTo.value))
                 })
             })
             const data = await response.json();
             let quotation = "" + data.priceLabel + "\n";
             data.price.forEach((element) => {
-                quotation += (element);
+                quotation += (element + "\n");
             })
+            console.log(data)
             quotationResult.value = quotation;
         });
         let quotationForm = document.querySelector('.quoatation_form');

@@ -4,3 +4,7 @@
 air
 credentials.json
 token.json
+gcp_svc_key.json
+**/.terraform/*
+*.tfstate
+*.tfstate.*
