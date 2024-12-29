@@ -8,3 +8,4 @@ gcp_svc_key.json
 **/.terraform/*
 *.tfstate
 *.tfstate.*
+*.pem
