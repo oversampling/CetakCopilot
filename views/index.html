@@ -326,12 +326,14 @@
             console.log('quotationForm');
         });
         // If primary addon is spotUV1side then secondary addon spotUV1side should be disabled and secondary addon spotUV1side should be none
+        spotUV1side.disabled = true;
+        spotUV1side.value = "none";
         surfaceProtectionPrinting.addEventListener('change', function (e) {
-            if (surfaceProtectionPrinting.value === "spot uv 1side") {
-                spotUV1side.value = "none";
-                spotUV1side.disabled = true;
-            } else {
+            if (surfaceProtectionPrinting.value === "matt lam 1side") {
                 spotUV1side.disabled = false;
+            } else {
+
+                spotUV1side.disabled = true;
             }
         });
         // If number of colours is 0 then third addons should be disabled

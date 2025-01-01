@@ -311,28 +311,28 @@ func (q *Quotation) provideDiscountForReadiedSize(quotationStringTemplate string
 	if q.ReadiedSize {
 		for _, quantity := range q.Quantity {
 			quantity_string := strconv.Itoa(quantity)
-			price, err := strconv.ParseFloat(priceMap[quantity_string], 64)
-			if err != nil {
-				fmt.Println("Error converting string to float \n", err)
-			}
+			// price, err := strconv.ParseFloat(priceMap[quantity_string], 64)
+			// if err != nil {
+			// 	fmt.Println("Error converting string to float \n", err)
+			// }
 			if q.SizeCategory == "A1" {
-				price = price - discountMap["A1"]
+				// price = price - discountMap["A1"]
 				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A1"]), -1)
 			} else if q.SizeCategory == "A2" {
-				price = price - discountMap["A2"]
+				// price = price - discountMap["A2"]
 				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A2"]), -1)
 			} else if q.SizeCategory == "A3" {
-				price = price - discountMap["A3"]
+				// price = price - discountMap["A3"]
 				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A3"]), -1)
 			} else if q.SizeCategory == "A4" {
-				price = price - discountMap["A4"]
+				// price = price - discountMap["A4"]
 				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A4"]), -1)
 			} else if q.SizeCategory == "A5" {
-				price = price - discountMap["A5"]
+				// price = price - discountMap["A5"]
 				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A5"]), -1)
 			}
-			priceMap[quantity_string] = fmt.Sprintf("%.2f", price)
-
+			// fmt.Println("discount given", price)
+			priceMap = q.addTotalPriceInString(priceMap, quantity_string, fmt.Sprintf("-%.2f", discountMap[q.SizeCategory]))
 		}
 	} else {
 		for _, quantity := range q.Quantity {
@@ -415,13 +415,13 @@ func (q *Quotation) addHeaderRemoveTemplate(quotationStringTemplate string) stri
 		machineDisplay = "Logic Error"
 	}
 
-	header := fmt.Sprintf(`*QUOTATION : BOX PRINTING : %s 
+	header := fmt.Sprintf(`*QUOTATION : BOX PRINTING : %s *
 product : box
 machine : %s
 shape : shape such like open lid / hinged / cake / top bottom / drawer & etc
 material : (see below)
 finishing : die cut / die cut + gluing
-quantity : (see below)
+quantity : (see below) For quantity more than 2000pcs, please whatsapp us +60163443238 to request quotation due to paper price fluctuation issue. 
 print side : %s (%s x %s)
 colour : %s
 print process : 6-7days (art card) / 8-10days (with beautify finishing) / 13-14days (carton material) excluded sat, sun, public holiday & pre-preparation works
