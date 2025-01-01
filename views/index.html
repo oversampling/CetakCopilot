@@ -325,6 +325,29 @@
             e.preventDefault();
             console.log('quotationForm');
         });
+        // If primary addon is spotUV1side then secondary addon spotUV1side should be disabled and secondary addon spotUV1side should be none
+        surfaceProtectionPrinting.addEventListener('change', function (e) {
+            if (surfaceProtectionPrinting.value === "spot uv 1side") {
+                spotUV1side.value = "none";
+                spotUV1side.disabled = true;
+            } else {
+                spotUV1side.disabled = false;
+            }
+        });
+        // If number of colours is 0 then third addons should be disabled
+        isDoubleSide.disabled = true;
+        finishingAnotherSide.disabled = true;
+        noOfColours.addEventListener('change', function (e) {
+            if (noOfColours.value === "0colour") {
+                isDoubleSide.value = "false";
+                isDoubleSide.disabled = true;
+                finishingAnotherSide.value = "no finishing (may cause colour rubbing issue)";
+                finishingAnotherSide.disabled = true;
+            } else {
+                isDoubleSide.disabled = false;
+                finishingAnotherSide.disabled = false;
+            }
+        });
     </script>
 </body>
 
