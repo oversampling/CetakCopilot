@@ -40,6 +40,7 @@ var (
 	// Double sides printing
 	finishingAnotherSide = []string{"no finishing (may cause colour rubbing issue)", "uv varnish 1side", "spot uv 1side", "water base normal 1side", "water base food grade 1side", "matt lam 1side", "gloss lam 1side"}
 	noOfColours          = []string{"0colour", "1colour", "4colours"}
+	isReadiedSize        = []string{"custom", "readied"}
 )
 
 type ThirdAddOns struct {
@@ -104,7 +105,7 @@ func (q *Quotation) getPrintingCost(srv *sheets.Service, spreadsheetId string, r
 					fmt.Println("Error converting int to string \n", err)
 				}
 				if row[1] == search_str_noOfColours && row[2] == search_str_material && row[4] == quantity_string && row[3] == search_str_sizeCategory {
-					temp := fmt.Sprintf("📌 *%s pcs*: RM%s Printing <Primary%s><Secondary%s><Third%s><Total%s>\n", row[4], row[5], strconv.Itoa(quantity), strconv.Itoa(quantity), strconv.Itoa(quantity), strconv.Itoa(quantity))
+					temp := fmt.Sprintf("📌 *%s pcs*: RM%s Printing <Primary%s><Secondary%s><Third%s><ReadiedSizeDiscount%s><Total%s>\n", row[4], row[5], strconv.Itoa(quantity), strconv.Itoa(quantity), strconv.Itoa(quantity), strconv.Itoa(quantity), strconv.Itoa(quantity))
 					quotationStringTemplate += temp
 					priceMap[quantity_string] = row[5].(string)
 				}
@@ -146,7 +147,7 @@ func (q *Quotation) getPrimaryAddOn(srv *sheets.Service, spreadsheetId string, r
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
 	}
 	var search_string_sizeCategory string = q.SizeCategory
-	var search_string_finishing string = q.PrimaryAddOns.SurfaceProtectionPrinting
+	var search_string_finishing string = q.PrimaryAddOns.SurfaceProtectionPrinting // This one return empty
 
 	for _, quantity := range q.Quantity {
 		for _, row := range resp.Values {
@@ -155,7 +156,6 @@ func (q *Quotation) getPrimaryAddOn(srv *sheets.Service, spreadsheetId string, r
 				if err != nil {
 					fmt.Println("Error converting int to string \n", err)
 				}
-
 				if row[0] == search_string_finishing && row[1] == search_string_sizeCategory && row[2] == quantity_string {
 					quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Primary%s>", quantity_string), fmt.Sprintf("+ RM%s %s", row[3], search_string_finishing), -1)
 					priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[3].(string))
@@ -223,18 +223,19 @@ func (q *Quotation) getSecondaryAddOn(srv *sheets.Service, spreadsheetId string,
 					quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Secondary%s>", quantity_string), fmt.Sprintf(" + RM%s %s<Secondary%s>", row[3], windowHoleWithTransparentPVCSheet, quantity_string), -1)
 					priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[3].(string))
 				}
-				spotUV1Side, ok := checkSecondaryAddOnMatch(row, search_string_sizeCategory, quantity_string, "spot uv 1side")
-				if ok {
-					if q.ThirdAddOns.IsDoubleSide {
-						quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Secondary%s>", quantity_string), fmt.Sprintf(" + RM%s %s<Secondary%s>", row[4], spotUV1Side, quantity_string), -1)
-						priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[4].(string))
+				if q.SecondaryAddOns.SpotUV1Side == "spotUV1side" {
+					spotUV1Side, ok := checkSecondaryAddOnMatch(row, search_string_sizeCategory, quantity_string, "spot uv 1side")
+					if ok {
+						if q.ThirdAddOns.IsDoubleSide {
+							quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Secondary%s>", quantity_string), fmt.Sprintf(" + RM%s %s<Secondary%s>", row[4], spotUV1Side, quantity_string), -1)
+							priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[4].(string))
 
-					} else {
-						quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Secondary%s>", quantity_string), fmt.Sprintf(" + RM%s %s<Secondary%s>", row[3], spotUV1Side, quantity_string), -1)
-						priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[3].(string))
+						} else {
+							quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Secondary%s>", quantity_string), fmt.Sprintf(" + RM%s %s<Secondary%s>", row[3], spotUV1Side, quantity_string), -1)
+							priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[3].(string))
+						}
 					}
 				}
-
 			}
 		}
 	}
@@ -252,27 +253,22 @@ func (q *Quotation) getThirdAddOnPrinting(srv *sheets.Service, spreadsheetId str
 	var search_string_sizeCategory string = q.SizeCategory
 	var search_str_noOfColours string = q.NoOfColours
 	var search_str_material string = q.Material
-
-	for _, quantity := range q.Quantity {
-		for _, row := range resp.Values {
-			if len(row) == 6 {
-				quantity_string := strconv.Itoa(quantity)
-				// fmt.Println("Quantity String: ", quantity_string)
-				if err != nil {
-					fmt.Println("Error converting int to string \n", err)
-				}
-				// fmt.Println(row[1], search_str_noOfColours, row[1] == search_str_noOfColours)
-				// fmt.Println(row[1], search_str_material, row[1] == search_str_material)
-				// fmt.Println(row[2], search_string_sizeCategory, row[2] == search_string_sizeCategory)
-
-				if row[1] == search_str_noOfColours && row[2] == search_str_material && row[3] == search_string_sizeCategory && row[4] == quantity_string {
-					quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Third%s>", quantity_string), fmt.Sprintf(" + RM%s %s<Third%s>", row[5], "Double Side Printing", quantity_string), -1)
-					priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[5].(string))
+	if q.ThirdAddOns.IsDoubleSide && q.NoOfColours != "0colour" {
+		for _, quantity := range q.Quantity {
+			for _, row := range resp.Values {
+				if len(row) == 6 {
+					quantity_string := strconv.Itoa(quantity)
+					if err != nil {
+						fmt.Println("Error converting int to string \n", err)
+					}
+					if row[1] == search_str_noOfColours && row[2] == search_str_material && row[3] == search_string_sizeCategory && row[4] == quantity_string {
+						quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Third%s>", quantity_string), fmt.Sprintf(" + RM%s %s<Third%s>", row[5], "printing another side", quantity_string), -1)
+						priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[5].(string))
+					}
 				}
 			}
 		}
 	}
-
 	return quotationStringTemplate, priceMap, nil
 }
 
@@ -283,23 +279,66 @@ func (q *Quotation) getThirdAddOnFinishing(srv *sheets.Service, spreadsheetId st
 	}
 	var search_string_sizeCategory string = q.SizeCategory
 	var search_string_finishing string = q.ThirdAddOns.FinishingAnotherSide
+	if q.ThirdAddOns.IsDoubleSide && q.NoOfColours != "0colour" {
+		for _, quantity := range q.Quantity {
+			for _, row := range resp.Values {
+				if len(row) == 5 {
+					quantity_string := strconv.Itoa(quantity)
+					if err != nil {
+						fmt.Println("Error converting int to string \n", err)
+					}
 
-	for _, quantity := range q.Quantity {
-		for _, row := range resp.Values {
-			if len(row) == 5 {
-				quantity_string := strconv.Itoa(quantity)
-				if err != nil {
-					fmt.Println("Error converting int to string \n", err)
-				}
-
-				if row[0] == search_string_finishing && row[1] == search_string_sizeCategory && row[2] == quantity_string {
-					quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Third%s>", quantity_string), fmt.Sprintf(" + RM%s %s", row[4], search_string_finishing), -1)
-					priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[4].(string))
+					if row[0] == search_string_finishing && row[1] == search_string_sizeCategory && row[2] == quantity_string {
+						quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Third%s>", quantity_string), fmt.Sprintf(" + RM%s %s", row[4], search_string_finishing), -1)
+						priceMap = q.addTotalPriceInString(priceMap, quantity_string, row[4].(string))
+					}
 				}
 			}
 		}
 	}
 
+	return quotationStringTemplate, priceMap, nil
+}
+
+func (q *Quotation) provideDiscountForReadiedSize(quotationStringTemplate string, priceMap map[string]string) (string, map[string]string, error) {
+	var discountMap = make(map[string]float64)
+	discountMap["A1"] = 300
+	discountMap["A2"] = 250
+	discountMap["A3"] = 200
+	discountMap["A4"] = 150
+	discountMap["A5"] = 100
+
+	if q.ReadiedSize {
+		for _, quantity := range q.Quantity {
+			quantity_string := strconv.Itoa(quantity)
+			price, err := strconv.ParseFloat(priceMap[quantity_string], 64)
+			if err != nil {
+				fmt.Println("Error converting string to float \n", err)
+			}
+			if q.SizeCategory == "A1" {
+				price = price - discountMap["A1"]
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A1"]), -1)
+			} else if q.SizeCategory == "A2" {
+				price = price - discountMap["A2"]
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A2"]), -1)
+			} else if q.SizeCategory == "A3" {
+				price = price - discountMap["A3"]
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A3"]), -1)
+			} else if q.SizeCategory == "A4" {
+				price = price - discountMap["A4"]
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A4"]), -1)
+			} else if q.SizeCategory == "A5" {
+				price = price - discountMap["A5"]
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A5"]), -1)
+			}
+			priceMap[quantity_string] = fmt.Sprintf("%.2f", price)
+
+		}
+	} else {
+		for _, quantity := range q.Quantity {
+			quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", strconv.Itoa(quantity)), "", -1)
+		}
+	}
 	return quotationStringTemplate, priceMap, nil
 }
 
@@ -318,9 +357,9 @@ func (q *Quotation) addTotalToTemplate(quotationStringTemplate string, priceMap 
 func (q *Quotation) addHeaderRemoveTemplate(quotationStringTemplate string) string {
 	var readiedCustomedSizeDisplay string = ""
 	if q.ReadiedSize {
-		readiedCustomedSizeDisplay = "Readied Size"
+		readiedCustomedSizeDisplay = "Readied Size Shape"
 	} else {
-		readiedCustomedSizeDisplay = "Customed Size"
+		readiedCustomedSizeDisplay = "Customed Size Shape"
 	}
 	var singleDoubleSiteDisplay string = ""
 	if q.ThirdAddOns.IsDoubleSide {
@@ -328,25 +367,75 @@ func (q *Quotation) addHeaderRemoveTemplate(quotationStringTemplate string) stri
 	} else {
 		singleDoubleSiteDisplay = "Single Side Printing"
 	}
+	var printingAddons string = q.Material
+	if q.PrimaryAddOns.SurfaceProtectionPrinting != "no finishing (may cause colour rubbing issue)" {
+		printingAddons += fmt.Sprintf(" + %s", q.PrimaryAddOns.SurfaceProtectionPrinting)
+	}
+	if q.SecondaryAddOns.WindowHoleWithoutTransparentPVCSheet != "none" {
+		// Add key for window hole without transparent pvc sheet
+		printingAddons += " + window hole without transparent pvc sheet " + q.SecondaryAddOns.WindowHoleWithoutTransparentPVCSheet
+	}
+	if q.SecondaryAddOns.WindowHoleWithTransparentPVCSheet != "none" {
+		printingAddons += " + window hole with transparent pvc sheet " + q.SecondaryAddOns.WindowHoleWithTransparentPVCSheet
+	}
+	if q.SecondaryAddOns.Hotstamping != "none" {
+		printingAddons += " + hot stamping " + q.SecondaryAddOns.Hotstamping
+	}
+	if q.SecondaryAddOns.EmbossDeboss != "none" {
+		printingAddons += " + emboss / deboss " + q.SecondaryAddOns.EmbossDeboss
+	}
+	if q.SecondaryAddOns.String != "none" {
+		printingAddons += " + string " + q.SecondaryAddOns.String
+	}
+	if q.SecondaryAddOns.SpotUV1Side != "none" {
+		printingAddons += " + spot uv 1side"
+	}
+	if q.ThirdAddOns.IsDoubleSide && q.NoOfColours != "0colour" {
+		printingAddons += fmt.Sprintf(" + %s ", "printing another side")
+		if q.ThirdAddOns.FinishingAnotherSide != "no finishing (may cause colour rubbing issue)" {
+			printingAddons += fmt.Sprintf(" + %s %s", q.ThirdAddOns.FinishingAnotherSide, "another side")
+		}
+	}
+	var colourDisplay string = ""
+	if q.NoOfColours == "0colour" {
+		colourDisplay = "no printing"
+	} else if q.NoOfColours == "1colour" {
+		colourDisplay = "1colour printing (cyan / magenta / yellow / black)"
+	} else {
+		colourDisplay = "colourful printing CMYK"
+	}
+	var machineDisplay string = ""
+	if q.Quantity[0] <= 500 && q.Quantity[len(q.Quantity)-1] <= 500 {
+		machineDisplay = "digital offset / litho offset"
+	} else if q.Quantity[0] < 500 && q.Quantity[len(q.Quantity)-1] >= 500 {
+		machineDisplay = "litho offset (1000pcs & above), digital offset (10-500pcs)"
+	} else if q.Quantity[len(q.Quantity)-1] > 500 {
+		machineDisplay = "litho offset"
+	} else {
+		machineDisplay = "Logic Error"
+	}
 
 	header := fmt.Sprintf(`*QUOTATION : BOX PRINTING : %s 
 product : box
-machine : litho offset
-shape : open lid / hinged / cake / top bottom / drawer + pvc window none
+machine : %s
+shape : shape such like open lid / hinged / cake / top bottom / drawer & etc
 material : (see below)
 finishing : die cut / die cut + gluing
 quantity : (see below)
-print side : %s (4colours x 0colour)
-colour : colourful printing CMYK
-print process : 6-7days excluded sat, sun, public holiday & pre-preparation works
+print side : %s (%s x %s)
+colour : %s
+print process : 6-7days (art card) / 8-10days (with beautify finishing) / 13-14days (carton material) excluded sat, sun, public holiday & pre-preparation works
 
 
 estimated price :
-[ %s ]`, q.SizeCategory, singleDoubleSiteDisplay, readiedCustomedSizeDisplay)
+[ %s ] 
+%s
+`, q.SizeCategory, machineDisplay, singleDoubleSiteDisplay, q.NoOfColours, q.NoOfColours, colourDisplay, readiedCustomedSizeDisplay, printingAddons)
 	quotationStringTemplate = strings.Replace(quotationStringTemplate, "<Header>", header, -1)
 	// remove all the template
 	for _, quantity := range q.Quantity {
 		quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Secondary%s>", strconv.Itoa(quantity)), "", -1)
+		quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<Third%s>", strconv.Itoa(quantity)), "", -1)
 	}
 	return quotationStringTemplate
 }
@@ -584,6 +673,7 @@ func main() {
 			"stringFinishing":                      stringFinishing,
 			"finishingAnotherSide":                 finishingAnotherSide,
 			"noOfColours":                          noOfColours,
+			"isReadiedSize":                        isReadiedSize,
 		})
 	})
 
@@ -592,6 +682,7 @@ func main() {
 		if err := c.BodyParser(quotation); err != nil {
 			return err
 		}
+		fmt.Println("Quotation: ", quotation)
 		quotationStringTemplate, priceMap, err := quotation.getPrintingCost(srv, spreadsheetId, "printing_raw")
 		if err != nil {
 			fmt.Println("Unable to get printing cost")
@@ -611,6 +702,10 @@ func main() {
 		quotationStringTemplate, priceMap, err = quotation.getThirdAddOnFinishing(srv, spreadsheetId, "primary_secondary_addon_raw", quotationStringTemplate, priceMap)
 		if err != nil {
 			fmt.Println("Unable to get secondary addon finishing")
+		}
+		quotationStringTemplate, priceMap, err = quotation.provideDiscountForReadiedSize(quotationStringTemplate, priceMap)
+		if err != nil {
+			fmt.Println("Unable to provide discount for readied size")
 		}
 		quotationStringTemplate = quotation.addTotalToTemplate(quotationStringTemplate, priceMap)
 		quotationStringTemplate = quotation.addHeaderRemoveTemplate(quotationStringTemplate)

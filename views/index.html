@@ -21,7 +21,7 @@
     <form class="quoatation_form">
         <div class="row g-3 align-items-center">
             <div class="col-auto">
-                <label for="inputPassword6" class="col-form-label">Category Size</label>
+                <label for="inputPassword6" class="col-form-label">category size</label>
             </div>
             <div class="col-auto">
                 <select class="form-select" id="categorySize" name="sizeCategory">
@@ -40,12 +40,16 @@
         <div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Ready Or Custom Shape</label>
+                    <label for="inputPassword6" class="col-form-label">ready or custom shape</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="isReadiedSize" aria-label="Floating label select example">
+                        <!-- <option value="custom">Custom Size Shape</option>
                         <option value="readied" selected>Readied Size Shape</option>
-                        <option value="custom">Custom Size Shape</option>
+                         -->
+                        {{ range .isReadiedSize}}
+                        <option value="{{ . }}">{{ . }} size shape</option>
+                        {{ end }}
                     </select>
                 </div>
                 <div class="col-auto">
@@ -56,7 +60,7 @@
             </div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Number of Colour</label>
+                    <label for="inputPassword6" class="col-form-label">number of colour</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="noOfColours" aria-label="Floating label select example">
@@ -68,7 +72,7 @@
             </div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Material</label>
+                    <label for="inputPassword6" class="col-form-label">material</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="material" name="material">
@@ -82,7 +86,7 @@
             <div class="row g-3 align-items-center">
                 <div class="row g-3 align-items-center col-auto">
                     <div class="col-auto">
-                        <label for="inputPassword6" class="col-form-label">From Quantity</label>
+                        <label for="inputPassword6" class="col-form-label">from quantity</label>
                     </div>
                     <div class="col-auto">
                         <select class="form-select" id="quantityFrom" name="quantityFrom">
@@ -94,7 +98,7 @@
                 </div>
                 <div class="row g-3 col-auto">
                     <div class="col-auto">
-                        <label for="inputPassword6" class="col-form-label">To Quantity</label>
+                        <label for="inputPassword6" class="col-form-label">to quantity</label>
                     </div>
                     <div class="col-auto">
                         <select class="form-select" id="quantityTo" name="quantityTo">
@@ -110,7 +114,7 @@
         <div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Surface Protection Finishing</label>
+                    <label for="inputPassword6" class="col-form-label">surface protection finishing</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="surfaceProtectionPrinting"
@@ -126,7 +130,7 @@
         <div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Spot UV 1 Side</label>
+                    <label for="inputPassword6" class="col-form-label">spot uv 1side</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="spotUV1side" aria-label="Floating label select example">
@@ -137,7 +141,7 @@
             </div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Window Hole Without Transperant PVC Sheet</label>
+                    <label for="inputPassword6" class="col-form-label">window hole without transperant pvc sheet</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="windowHoleWithoutTransparentPVCSheet"
@@ -150,7 +154,7 @@
             </div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Window hole with transparent pvc sheet</label>
+                    <label for="inputPassword6" class="col-form-label">window hole with transparent pvc sheet</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="windowHoleWithTransparentPVCSheet"
@@ -163,7 +167,7 @@
             </div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Hot Stamping</label>
+                    <label for="inputPassword6" class="col-form-label">hot stamping</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="hotstamping" aria-label="Floating label select example">
@@ -175,7 +179,7 @@
             </div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Emboss / Deboss</label>
+                    <label for="inputPassword6" class="col-form-label">emboss / deboss</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="embossDeboss" aria-label="Floating label select example">
@@ -187,7 +191,7 @@
             </div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">String</label>
+                    <label for="inputPassword6" class="col-form-label">string</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="stringFinishing" aria-label="Floating label select example">
@@ -202,7 +206,7 @@
         <div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Print Other Side</label>
+                    <label for="inputPassword6" class="col-form-label">print another side</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="isDoubleSide" aria-label="Floating label select example">
@@ -213,12 +217,12 @@
             </div>
             <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="inputPassword6" class="col-form-label">Finishing Other Side</label>
+                    <label for="inputPassword6" class="col-form-label">finishing another side</label>
                 </div>
                 <div class="col-auto">
                     <select class="form-select" id="finishingAnotherSide" aria-label="Floating label select example">
                         {{ range .finishingAnotherSide }}
-                        <option value="{{ . }}">{{ . }}</option>
+                        <option value="{{ . }}">{{ . }} another side</option>
                         {{ end }}
                     </select>
                 </div>
@@ -282,33 +286,35 @@
         quantitySubRange = getQuantitySubRange(100, 500);
         generateQuoatationBtn.addEventListener('click', async function (e) {
             e.preventDefault();
+            let jsonstring = JSON.stringify({
+                sizeCategory: categorySize.value,
+                quantity: getQuantitySubRange(parseInt(quantityFrom.value), parseInt(quantityTo.value)),
+                material: material.value,
+                noOfColours: noOfColours.value,
+                readiedSize: (isReadiedSize.value === "readied") ? true : false,
+                primaryAddOns: {
+                    surfaceProtectionPrinting: surfaceProtectionPrinting.value,
+                },
+                secondaryAddOns: {
+                    spotUV1side: spotUV1side.value,
+                    windowHoleWithoutTransparentPVCSheet: windowHoleWithoutTransparentPVCSheet.value,
+                    windowHoleWithTransparentPVCSheet: windowHoleWithTransparentPVCSheet.value,
+                    hotstamping: hotstamping.value,
+                    embossDeboss: embossDeboss.value,
+                    string: stringFinishing.value,
+                },
+                thirdAddOns: {
+                    isDoubleSide: (isDoubleSide.value === "true") ? true : false,
+                    finishingAnotherSide: finishingAnotherSide.value,
+                },
+            });
+            console.log(jsonstring);
             const response = await fetch(`${host}/getQuotation`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    sizeCategory: categorySize.value,
-                    quantity: getQuantitySubRange(parseInt(quantityFrom.value), parseInt(quantityTo.value)),
-                    material: material.value,
-                    noOfColours: noOfColours.value,
-                    readiedSize: (isReadiedSize.value === "readied") ? true : false,
-                    primaryAddOn: {
-                        surfaceProtectionPrinting: surfaceProtectionPrinting.value,
-                    },
-                    secondaryAddOn: {
-                        spotUV1side: spotUV1side.value,
-                        windowHoleWithoutTransparentPVCSheet: windowHoleWithoutTransparentPVCSheet.value,
-                        windowHoleWithTransparentPVCSheet: windowHoleWithTransparentPVCSheet.value,
-                        hotstamping: hotstamping.value,
-                        embossDeboss: embossDeboss.value,
-                        string: stringFinishing.value,
-                    },
-                    thirdAddOn: {
-                        isDoubleSide: (isDoubleSide.value === "true") ? true : false,
-                        finishingAnotherSide: finishingAnotherSide.value,
-                    },
-                })
+                body: jsonstring,
             })
             const responseText = await response.text();
             console.log(responseText);
