@@ -317,19 +317,19 @@ func (q *Quotation) provideDiscountForReadiedSize(quotationStringTemplate string
 			// }
 			if q.SizeCategory == "A1" {
 				// price = price - discountMap["A1"]
-				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A1"]), -1)
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - RM%.0f readied size shaped", discountMap["A1"]), -1)
 			} else if q.SizeCategory == "A2" {
 				// price = price - discountMap["A2"]
-				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A2"]), -1)
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - RM%.0f readied size shaped", discountMap["A2"]), -1)
 			} else if q.SizeCategory == "A3" {
 				// price = price - discountMap["A3"]
-				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A3"]), -1)
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - RM%.0f readied size shaped", discountMap["A3"]), -1)
 			} else if q.SizeCategory == "A4" {
 				// price = price - discountMap["A4"]
-				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A4"]), -1)
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - RM%.0f readied size shaped", discountMap["A4"]), -1)
 			} else if q.SizeCategory == "A5" {
 				// price = price - discountMap["A5"]
-				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - %.2f Readied Size", discountMap["A5"]), -1)
+				quotationStringTemplate = strings.Replace(quotationStringTemplate, fmt.Sprintf("<ReadiedSizeDiscount%s>", quantity_string), fmt.Sprintf(" - RM%.0f readied size shaped", discountMap["A5"]), -1)
 			}
 			// fmt.Println("discount given", price)
 			priceMap = q.addTotalPriceInString(priceMap, quantity_string, fmt.Sprintf("-%.2f", discountMap[q.SizeCategory]))
@@ -363,9 +363,9 @@ func (q *Quotation) addHeaderRemoveTemplate(quotationStringTemplate string) stri
 	}
 	var singleDoubleSiteDisplay string = ""
 	if q.ThirdAddOns.IsDoubleSide {
-		singleDoubleSiteDisplay = "Double Side Printing"
+		singleDoubleSiteDisplay = "double side printing"
 	} else {
-		singleDoubleSiteDisplay = "Single Side Printing"
+		singleDoubleSiteDisplay = "single side printing"
 	}
 	var printingAddons string = q.Material
 	if q.PrimaryAddOns.SurfaceProtectionPrinting != "no finishing (may cause colour rubbing issue)" {
