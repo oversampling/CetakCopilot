@@ -229,6 +229,8 @@
             </div>
         </div>
         <button type="button" id="generateQuoatationBtn" class="btn btn-primary">Generate Quotation</button>
+        <div class="spinner-border spinner-border-sm ms-auto d-none" role="status" aria-hidden="true"
+            id="spinner-loading"></div>
         <div class="form-floating">
             <textarea class="form-control" placeholder="Leave a comment here" style="height: 100px"
                 id="quotationResult"></textarea>
@@ -239,6 +241,7 @@
         let host = `https://{{ .host }}:{{ .port }}`;
         let generateQuoatationBtn = document.getElementById('generateQuoatationBtn');
         let quotationResult = document.getElementById('quotationResult');
+        let spinnerLoading = document.getElementById('spinner-loading');
         // Printing
         let categorySize = document.getElementById('categorySize');
         let isReadiedSize = document.getElementById('isReadiedSize');
@@ -309,6 +312,7 @@
                 },
             });
             console.log(jsonstring);
+            spinnerLoading.classList.remove('d-none');
             const response = await fetch(`${host}/getQuotation`, {
                 method: "POST",
                 headers: {
@@ -319,6 +323,7 @@
             const responseText = await response.text();
             console.log(responseText);
             quotationResult.value = responseText;
+            spinnerLoading.classList.add('d-none');
         });
         let quotationForm = document.querySelector('.quoatation_form');
         quotationForm.addEventListener('submit', function (e) {
